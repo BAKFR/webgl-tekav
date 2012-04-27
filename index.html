@@ -22,7 +22,7 @@
 		        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		    }
 		</script>
-		<canvas id="canvas" style="width:100%; height:100%"></canvas>
+		<canvas id="canvas" width="1400" height="800" ></canvas>
 		<script>
 			window.onload = function() {
 
@@ -85,10 +85,11 @@
 
 			        gl.useProgram(shaderProgram);
 
-			        //Link une variable Shader et une variable local !
+			        // Link une variable Shader et une variable local !
 			        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
 			        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
+					// Link une variable Shader et une variable local !
 			        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 			        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 			    }
