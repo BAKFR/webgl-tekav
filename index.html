@@ -4,25 +4,27 @@
 	</head>
 	<body>
 		<script id="shader-fs" type="x-shader/x-fragment">
-		    precision mediump float;
+		  precision mediump float;
 
-		    void main(void) {
-		        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-		    }
+		  varying vec4 vColor;
+
+		  void main(void) {
+		    gl_FragColor = vColor;
+		  }
 		</script>
 		<script id="shader-vs" type="x-shader/x-vertex">
-			//On utilise attribute pour récupérer une position en javascript
-			//La valeur change pour chaque passage.
-		    attribute vec3 aVertexPosition;
+		  attribute vec3 aVertexPosition;
+		  attribute vec4 aVertexColor;
 
-		    //On utilise uniform pour récupérer tout aute type de variable.
-		    //Les valeurs sont gardées entre chaque passage.
-		    uniform mat4 uMVMatrix;
-		    uniform mat4 uPMatrix;
+		  uniform mat4 uMVMatrix;
+		  uniform mat4 uPMatrix;
 
-		    void main(void) {
-		        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		    }
+		  varying vec4 vColor;
+
+		  void main(void) {
+		    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		    vColor = aVertexColor;
+		  }
 		</script>
 
 		<canvas id="canvas" width="1400" height="800" ></canvas>
@@ -98,6 +100,9 @@
 	        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
 	        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
+	        shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    		gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
 			// Link une variable Shader et une variable local !
 	        shaderProgram.camera = gl.getUniformLocation(shaderProgram, "uPMatrix");
 	        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
@@ -108,19 +113,21 @@
 	     * @brief crée un objet webGL affichable.
 	     *
 	     * @param vertices doit être un tableau contenant les points de l'objet.
-	     * @param numItems est le nombre de points de cet objet.
 	     */
-	    function makeWebGLObject(gl, vertices, numItems)
+	    function makeWebGLObject(gl, vertices, colors)
 	    {
 		    var obj = {
 		    	buffer: gl.createBuffer(),
+		    	colorBuffer: gl.createBuffer(),
 		    	vertices: vertices,
 		    	itemSize: 3,
-		    	numItems: numItems,
+		    	numItems: vertices.length / 3,
 		    	matrix: mat4.create()
 		    };
 		    gl.bindBuffer(gl.ARRAY_BUFFER, obj.buffer);
 		    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+		    gl.bindBuffer(gl.ARRAY_BUFFER, obj.colorBuffer);
+		    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 		    mat4.identity(obj.matrix);
 		    return obj;
 		}
@@ -147,6 +154,9 @@
 	    function prepareDrawObject(gl, shaderProgram, cameraMatrix, obj) {
 	 		gl.bindBuffer(gl.ARRAY_BUFFER, obj.buffer);
 	        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, obj.itemSize, gl.FLOAT, false, 0, 0);
+	        
+	        gl.bindBuffer(gl.ARRAY_BUFFER, obj.colorBuffer);
+	        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 	        gl.uniformMatrix4fv(shaderProgram.camera, false, cameraMatrix);
 	        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, obj.matrix);
 	    }
@@ -160,9 +170,9 @@
 
 			window.onload = function() {
 
-			    function drawScene(gl, shaderProgram, triangle, square) {
+			    function drawScene(gl, shaderProgram, triangle) {
 			    	camera = initCamera(gl);
-			    	mat4.translate(camera, [1, 0, 0]);
+			    	mat4.translate(camera, [0, 0, 0]);
 
 			    	//
 			        mat4.translate(triangle.matrix, [-1.5, 0.0, -7.0]);
@@ -188,27 +198,21 @@
 			        //On crée les objets.
 			        var triangle = makeWebGLObject(gl,
 			        	[
-			            	 0.0,  1.0,  0.0,
-			            	-1.0, -1.0,  0.0,
-			            	 1.0, -1.0,  0.0, 
-			            	 1.0,  1.0, 0.0
-			        	], 4);
-
-			        var square = makeWebGLObject(gl,
-			        	[
-				             1.0,  1.0,  0.0,
-				            -1.0,  1.0,  0.0,
-				             1.0, -1.0,  0.0,
-				            -1.0, -1.0,  0.0
-			        	], 4);
-
+				             0.0,  1.0,  0.0,
+				            -1.0, -1.0,  0.0,
+				             1.0, -1.0,  0.0
+			        	], [
+				            1.0, 0.0, 0.0, 1.0,
+				            0.0, 1.0, 0.0, 1.0,
+				            0.0, 0.0, 1.0, 1.0
+			        	]);
 
 			        //On configure webGL
 			        gl.clearColor(0.0, 0.0, 0.2, 1.0);
 			        gl.enable(gl.DEPTH_TEST);
 
 			        //On affiche la scene.
-			        drawScene(gl, shaderProgram, triangle, square);
+			        drawScene(gl, shaderProgram, triangle);
 			    }
 
 
