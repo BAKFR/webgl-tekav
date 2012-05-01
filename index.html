@@ -23,7 +23,7 @@
 
 		  void main(void) {
 		    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-		    vColor = aVertexColor;
+		    vColor = aVertexColor * 2.0;
 		  }
 		</script>
 
@@ -170,49 +170,17 @@
 
 			window.onload = function() {
 
-			    function drawScene(gl, shaderProgram, triangle) {
-			    	camera = initCamera(gl);
-			    	mat4.translate(camera, [0, 0, 0]);
-
-			    	//
-			        mat4.translate(triangle.matrix, [-1.5, 0.0, -7.0]);
-			        prepareDrawObject(gl, shaderProgram, camera, triangle);
-			        gl.drawArrays(gl.TRIANGLE_STRIP, 0, triangle.numItems);
-			    }
-
-
-
 			    function webGLStart() {
 			    	var canvas;
 			    	var gl;
 			    	var shaderProgram;
 
-			    	//On charge le canvas
-			        canvas = document.getElementById("canvas");
 
-			        //On chharge webGL, et les shaders.
-			        gl = initGL(canvas);
-			        shaderProgram = initShaders(gl);
+			    	//////////////////////////////////////
+			    	//A VOUS DE JOUER
+			    	////////////////////////////////////////
+			    	
 
-
-			        //On crée les objets.
-			        var triangle = makeWebGLObject(gl,
-			        	[
-				             0.0,  1.0,  0.0,
-				            -1.0, -1.0,  0.0,
-				             1.0, -1.0,  0.0
-			        	], [
-				            1.0, 0.0, 0.0, 1.0,
-				            0.0, 1.0, 0.0, 1.0,
-				            0.0, 0.0, 1.0, 1.0
-			        	]);
-
-			        //On configure webGL
-			        gl.clearColor(0.0, 0.0, 0.2, 1.0);
-			        gl.enable(gl.DEPTH_TEST);
-
-			        //On affiche la scene.
-			        drawScene(gl, shaderProgram, triangle);
 			    }
 
 
